@@ -5,7 +5,7 @@ AppleALC Intructions
 
 Before you start studying AppleHDA, you need to familiarize yourself with the concept of injecting layout.
 
-1. Extracting Linux - Dump
+## 1. Extracting Linux - Dump
 Starting from the Linux LiveCD drive (for example Ubuntu, Parted Magic ....) go to the folder / proc / asound / card0 / card # 0 or card # 2 this is a text file of the Linux dump.
 
 or in terminal
@@ -16,8 +16,8 @@ cat /proc/asound/card0/codec#1 > ~/Desktop/codec_dump.txt
 (or)
 cat /proc/asound/card0/codec#2 > ~/Desktop/codec_dump.txt
 
-2. Analysing the codec dump
-2.1 Codec information
+## 2. Analysing the codec dump
+### 2.1 Codec information
 We need the following details from the codec dump:
 1. Codec
 2. Address
@@ -93,7 +93,7 @@ Unsolicited: tag=04, enabled=1
 Connection: 2
 0x0c 0x0d*
 
-5. AUDIO MIXER/SELECTOR NODES:
+#### 5. AUDIO MIXER/SELECTOR NODES:
 Node 0x0b [Audio Mixer] wcaps 0x20010b: Stereo Amp-In
 Amp-In caps: ofs=0x17, nsteps=0x1f, stepsize=0x05, mute=1
 Amp-In vals: [0x97 0x97] [0x97 0x97] [0x97 0x97] [0x97 0x97] [0x97 0x97]
@@ -130,7 +130,7 @@ Amp-In vals: [0x80 0x80] [0x00 0x00] [0x80 0x80] [0x80 0x80] [0x80 0x80] [0x80 0
 Connection: 6
 0x18 0x19 0x1a 0x1b 0x1d 0x0b
 
-6. AUDIO OUTPUT NODES :
+#### 6. AUDIO OUTPUT NODES :
 Node 0x02 [Audio Output] wcaps 0x1d: Stereo Amp-Out
 Control: name="Speaker Playback Volume", index=0, device=0
 ControlAmp: chs=3, dir=Out, idx=0, ofs=0
@@ -153,7 +153,7 @@ rates [0x560]: 44100 48000 96000 192000
 bits [0xe]: 16 20 24
 formats [0x1]: PCM
 
-7. AUDIO INPUT NODES :
+#### 7. AUDIO INPUT NODES :
 Node 0x08 [Audio Input] wcaps 0x10011b: Stereo Amp-In
 Control: name="Capture Switch", index=0, device=0
 Control: name="Capture Volume", index=0, device=0
@@ -183,7 +183,7 @@ formats [0x1]: PCM
 Connection: 1
 0x22
 
-2.2 Extracting the values 'Pin Default', 'EAPD' and 'Node ID' from the Pin Complex Nodes
+### 2.2 Extracting the values 'Pin Default', 'EAPD' and 'Node ID' from the Pin Complex Nodes
 We have analysed and got the relevant details from the codec dump in sections 1 through 2.1. Now, we try to get the values of Pin Default, EAPD and Node ID from the Pin Complex nodes with Control Name extracted above.
 
 For the example ALC269:-
@@ -275,7 +275,7 @@ Existing verb data for External Mic is "ax", where 'a' tells its Mic In. Now, w
  
 For more information about the codec verbs info:Click Here.
 
-3 Calculating the PathMaps
+## 3 Calculating the PathMaps
  
 To calculate the PathMaps, we have to carefully follow the connections mentioned in every node from the analyzed relevant nodes information.
  
@@ -291,7 +291,7 @@ Pin Complex -> Audio Selector/Mixer -> Audio Input
 (or)
 Pin Complex -> Audio Input
 
-3.1 Output device PathMap calculation
+### 3.1 Output device PathMap calculation
 Lets first calculate the PathMaps for the output devices speaker and Headphone in our example ALC269.
  
 According to the output device PathMap pattern, first we need to find Pin Complex node. In our ALC269 example, the output device 'Speaker' is located at the Pin Complex Node 0x14 with the Control Name "Speaker Playback Switch". Write down this Pin Complex node value in hex and decimal value.
@@ -316,7 +316,7 @@ NOTE: 
 If both Pin Complex nodes have connection to same Audio output node then try to use the other output node we analyzed from codec dump and test. sometimes using same output node for both also works.
  
  
-3.2 Input device PathMaps calculation
+### 3.2 Input device PathMaps calculation
 Calculating the pathMaps for input devices is little different from the output devices because connections are not mentioned and doesn't follow similar to output nodes. So, in this case we have go through the PathMap pattern from "Audio input" to "Pin Complex node" instead from "Pin Complex node" to "Audio Input" like we did for Output devices.
 
 Like this,
@@ -383,7 +383,7 @@ The script wont work if you cd to the folder and run ./Codec.txt_convert.sh, it 
 If you know how to fix this please let me know
 
 
-4. Making a minimum pin-config (for output to the speakers)
+## 4. Making a minimum pin-config (for output to the speakers)
 To create a pin-config you will need the original Linux-dump (hex).
 The scheme for composing pin-config:
 Address + Node + 71c + [78] Address + Node + 71d + [56] Address + Node + 71e + [34] Address + Node + 71f + [12]
@@ -528,7 +528,7 @@ We write out all the pin-complexes, we block everything except 0x14.
 
 After following all the above steps, we get the verb commands and PathMaps for the codec. 
 
-5. Layoutxx.xml file Patching
+## 5. Layoutxx.xml file Patching
 From 10.8 or later, the xml files are compressed to zlib format. We have to uncompress them to edit the files. After editing, again we have to compress it back to zlib.
  
 For Compressing and uncompressing, use the attached perl script and below commands in terminal:
@@ -563,7 +563,7 @@ Next, Layout99.xml with all inputs / outputs:
 Green underlined exits, yellow entrances.
 Blue denotes the parameter MuteGPIO, details in section 5.2
 
-5.1. How to choose the right Layout?
+### 5.1. How to choose the right Layout?
 This is also an important point, because if your layout is not selected correctly - the sound will not start.
 The correct layout is the one that Apple uses, their list can be found in the AppleHDA driver directory: ~ / AppleHDA.kext / Contents / Resources, for clarity I show the picture:
 
@@ -573,7 +573,7 @@ The correct layout is the one that Apple uses, their list can be found in the Ap
 
 If in doubt choose - use layout12 (hex: 0x0C) not to be mistaken;)
 
-5.2. MuteGPIO 
+### 5.2. MuteGPIO 
 This parameter is responsible for enabling / disabling the microphone.
 If the node of your microphone is present in the table, simply overwrite the value from the table in MuteGPIO.
 
@@ -588,12 +588,8 @@ VREF 80 dec = 0x50 hex
 Hex 0x50010018 translate to dec, get 1342242840
 And prescribe MuteGPIO
 
-￼
 
-
-
-
-5.3 Patching
+### 5.3 Patching
 You can either use the attached xml files (or) can choose any one of the layout xml file from the apple Resources directory inside AppleHDA kext that matches Inputs and outputs of your codec and try this only if you want to experiment.
  
 I'm using the Layout28.xml of Apple and edited to the values of ALC269. One of the reason to choose layout28 is because its used in MacBookPro8,1 and works very well. The other layout id's which also works for some codecs are '1' and '12' in hackintosh.
@@ -675,7 +671,7 @@ For Others:
 Note: SignalProcessing elements for Mic and Speaker are not supported by some codecs, so i've removed it. But can provide some good audio if used but not sure, so try to experiment with this later after getting audio working. I've attached xml files with the SignalProcessing working fine in ALC269 for speaker and Mic in Realtek and IDT for your reference, you can get more from Apple xml files.
 
 
-6 Platforms.xml Patching
+## 6 Platforms.xml Patching
  
 This file contains the Mapping of Controls to its nodes giving a path. These path maps are contained in the key tag "<key>PathMaps</key>".
  
@@ -935,7 +931,7 @@ After all these manipulations, the following picture emerged:
 
 * For packaging the finished xml, use the same script pack-unpack-zlib.sh
 
-7.1. AMP layout is also Amplifier (amplifier)
+### 7.1. AMP layout is also Amplifier (amplifier)
 
 The general rule for configuring Amp is:
 We find in the nodes of the line Amp-In and Amp-Out, look at the values ​​of nsteps and mute.
@@ -1062,14 +1058,14 @@ Nsteps = 3 on the pin-output complex means Boosts = 3
 Result:
 ￼ut.
 
-7.2. Auto Detect Speakers and Headphones
+### 7.2. Auto Detect Speakers and Headphones
 Some equivalent devices are logically connected to an auto detect, for example, when headphones are connected, the sound goes to the headphones and the speakers are turned off, and the rear microphone is turned off when the front is connected.
 
 ￼
 
 In the figure, red arrows indicate the rear and front microphones, blue - Speakers and Headphones.
 
-7.3. Front panel does not work
+### 7.3. Front panel does not work
 Probably the reason is corny - the HD connector is not connected to the motherboard. Board.
 If the connector is connected, maybe it is made according to the AC97 standard then you can forget about the auto detect.
 Checking to which standard the front panel is the easiest in Winds: If the front panel auto detection is active and monitoring shows the connected connector, the front panel supports the HD standard. If the front panel needs to be turned off and it works autonomously from the rear panel, the front panel supports the AC97 standard.
@@ -1104,7 +1100,7 @@ Http://1.789saturn.ru/?p=1
 For education through AC97, I thank comrade BIM167
 
 
-8. EAPD
+## 8. EAPD
 After all the previous steps of the instruction are executed, in System Settings -> Sound: all Inputs and Outputs are displayed, the volume control in the top menu bar is active but there is no sound - you need to check your outputs for EAPD.
 
 ￼
@@ -1213,8 +1209,7 @@ Example:
 Code: 0x02 = binary 10 = 00000010 8 digit binary
 Reading the bits from left to right:
 
-Port Connectivity bits 7:6
------------------------------------------------------------
+Port Connectivity bits 7:6:
 00 - Port is connected to a Jack
 
 01 - No External Port -or- No physical connection for Port**
@@ -1224,8 +1219,7 @@ Port Connectivity bits 7:6
 11 - Jack and Internal device are attached
 
 
-Location Part 1 - bits 5:4
------------------------------------------------------------
+Location Part 1 - bits 5:4:
 00 - External on primary chassis
 
 01 - Internal
@@ -1235,8 +1229,7 @@ Location Part 1 - bits 5:4
 11 - Other
 
 
-Location Part 2 - bits 3:0
------------------------------------------------------------
+Location Part 2 - bits 3:0:
 The meaning depends on Location Part 1
 
 00 0000****N/A
@@ -1298,7 +1291,6 @@ The meaning depends on Location Part 1
 ************Bits
 
 Hex******76 54 3210
--------------------
 71cf01 = 00 00 0001 - Port has a jack - It is External - Rear Location
 
 71cf02 = 00 00 0010 - Port has a jack - It is External - Front Panel Location
